@@ -27,7 +27,7 @@ public class SDKWrapper : MonoBehaviour
     
     #region Android
 
-
+#if UNITY_ANDROID
     private static void logAndroidAPI(string className, string apiName, params object[] args)
     {
         logStringBuilder.Clear();
@@ -55,15 +55,15 @@ public class SDKWrapper : MonoBehaviour
 #endif
     }
 
-
+#endif
     
     #endregion
     
 
     #region iOS
-
+#if UNITY_IPHONE
 	// [DllImport("__Internal")]
 	// public static extern void __initIosSDK(string gameId, string cpId, string serverId, string appkey, string sandboxKey);
-
+#endif
     #endregion
 }
