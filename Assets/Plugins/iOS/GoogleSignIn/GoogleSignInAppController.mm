@@ -75,7 +75,7 @@ GoogleSignInHandler *gsiHandler;
   // Setup the Sign-In instance.
   GIDSignIn *signIn = [GIDSignIn sharedInstance];
   signIn.clientID = clientId;
-  signIn.uiDelegate = gsiHandler;
+//  signIn.uiDelegate = gsiHandler;
   signIn.delegate = gsiHandler;
 
   // looks like it's just calling itself, but the implementations were swapped
@@ -97,9 +97,9 @@ GoogleSignInHandler *gsiHandler;
                                       annotation:annotation];
 
   return [[GIDSignIn sharedInstance] handleURL:url
-                             sourceApplication:sourceApplication
-                                    annotation:annotation] ||
-         handled;
+                             //sourceApplication:sourceApplication
+                             //       annotation:annotation
+	] || handled;
 }
 
 /**
@@ -114,11 +114,11 @@ GoogleSignInHandler *gsiHandler;
 
   return [[GIDSignIn sharedInstance]
                      handleURL:url
-             sourceApplication:
-                 options[UIApplicationOpenURLOptionsSourceApplicationKey]
-                    annotation:
-                        options[UIApplicationOpenURLOptionsAnnotationKey]] ||
-         handled;
+             //sourceApplication:
+             //    options[UIApplicationOpenURLOptionsSourceApplicationKey]
+             //       annotation:
+             //           options[UIApplicationOpenURLOptionsAnnotationKey]
+	] || handled;
 }
 
 @end
