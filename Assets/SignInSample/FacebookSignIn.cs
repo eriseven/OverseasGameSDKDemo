@@ -26,6 +26,10 @@ public class FacebookSignIn: MonoBehaviour
         Debug.Log(nameof(InitCallBack));
         if (FB.IsInitialized)
         {
+            if (FB.IsLoggedIn)
+            {
+                Debug.Log("Facebook is logged in!");
+            }
             FB.ActivateApp();
         }
         else
@@ -48,8 +52,15 @@ public class FacebookSignIn: MonoBehaviour
     [IngameDebugConsole.ConsoleMethod("fb-login", "facebook login")]
     public static void Facebook_Login()
     {
-        var permission = new List<string>() { "public_profile", "email" };
-        FB.LogInWithReadPermissions(permission, AuthCallBack);
+        if (FB.IsLoggedIn)
+        {
+            AuthCallBack(null);
+        }
+        else
+        {
+            var permission = new List<string>() {"public_profile", "email"};
+            FB.LogInWithReadPermissions(permission, AuthCallBack);
+        }
     }
 
     [IngameDebugConsole.ConsoleMethod("fb-logout", "facebook logout")]
