@@ -20,22 +20,76 @@ internal interface ISignInInterface
     void SignOut();
 }
 
+
 public class SignInManager
 {
     static SignInManager()
     {
-        
+        RegisterInterface(GoogleSignInImp.Platform, new GoogleSignInImp("259113062157-c9efto68ne73jplnvi6cav8au1ss8j5j.apps.googleusercontent.com"));
+        RegisterInterface(FacebookSignInImp.Platform, new FacebookSignInImp());
+    }
+
+    static Dictionary<string, ISignInInterface> interfaces = new Dictionary<string, ISignInInterface>();
+
+    static void RegisterInterface(string platform, ISignInInterface imp)
+    {
+        interfaces[platform] = imp;
     }
     
+    static string GetCurrSignIn()
+    {
+        return PlayerPrefs.GetString("LastSignInPlatform", "");
+    }
+
     public static void TryQuickSignIn(Action<SignInResult> finished)
     {
+        if (currSignIn == null)
+        {
+            var currPaltform = GetCurrSignIn();
+            if (!string.IsNullOrEmpty(currPaltform))
+            {
+                interfaces.TryGetValue(currPaltform, out currSignIn);
+            }
+        }
+
+        if (currSignIn != null)
+        {
+            currSignIn.TryQuickSignIn(finished);
+        }
+        else
+        {
+            finished?.Invoke(new SignInResult()
+            {
+                Error = ""
+            });
+        }
+    }
+
+    static ISignInInterface currSignIn;
+    
+
+    static void Reset()
+    {
+        PlayerPrefs.DeleteKey("LastSignInPlatform");
+        currSignIn = null;
     }
 
     public static void SignIn(string signInPlatform, Action<SignInResult> finished)
     {
+        Reset();
+
+        if (interfaces.TryGetValue(signInPlatform, out var currSignIn))
+        {
+            currSignIn.SignIn(finished);
+        }
     }
 
     public static void SignOut()
     {
+        if (currSignIn != null)
+        {
+            currSignIn.SignOut();
+        }
+        Reset();
     }
 }
