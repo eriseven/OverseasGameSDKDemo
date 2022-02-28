@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "259113062157",
+    "project_id": "gal-4925d",
+    "storage_bucket": "gal-4925d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:259113062157:android:76bab5530ec19fdcdcea44",
+        "android_client_info": {
+          "package_name": "com.dreality.crazyones"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "259113062157-b82pki0b1gcfbvc333jsnildv2r4vtgd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dreality.crazyones",
+            "certificate_hash": "97415c9f7ee8c8ce24d6f47658cb5982b08e29a8"
+          }
+        },
+        {
+          "client_id": "259113062157-c9efto68ne73jplnvi6cav8au1ss8j5j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZC_ySXMFthgGCNNN4O2liHuiie1s7B-M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "259113062157-c9efto68ne73jplnvi6cav8au1ss8j5j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "259113062157-qb2gru9ikvua32gf0kmblo1s2emfo1n8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dreality.crazyones"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
