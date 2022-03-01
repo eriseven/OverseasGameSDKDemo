@@ -56,11 +56,14 @@ internal class GoogleSignInImp : ISignInInterface
     public static string Platform => "Google";
     public string SignInPlatform => Platform;
 
+
+    
     public void TryQuickSignIn(Action<SignInResult> finished)
     {
         GoogleSignIn.Configuration = configuration;
         GoogleSignIn.Configuration.UseGameSignIn = false;
         GoogleSignIn.Configuration.RequestIdToken = true;
+        GoogleSignIn.Configuration.RequestAuthCode = true;
         Log("Calling SignIn Silently");
 
         onSignInFinished = finished;
@@ -83,13 +86,21 @@ internal class GoogleSignInImp : ISignInInterface
                             (GoogleSignIn.SignInException)enumerator.Current;
                     Log("Got Error: " + error.Status + " " + error.Message);
                     SetPlatformFlag(true);
-                    onSignInFinished?.Invoke(new SignInResult() { Error = "Got Error: " + error.Status + " " + error.Message, });
+                    onSignInFinished?.Invoke(new SignInResult()
+                    {
+                        SignInPlatform = Platform,
+                        Error = "Got Error: " + error.Status + " " + error.Message,
+                    });
                 }
                 else
                 {
                     Log("Got Unexpected Exception?!?" + task.Exception);
                     SetPlatformFlag(true);
-                    onSignInFinished?.Invoke(new SignInResult() { Error = "Got Unexpected Exception?!?" + task.Exception, });
+                    onSignInFinished?.Invoke(new SignInResult()
+                    {
+                        SignInPlatform = SignInPlatform,
+                        Error = "Got Unexpected Exception?!?" + task.Exception,
+                    });
                 }
             }
         }
@@ -97,7 +108,11 @@ internal class GoogleSignInImp : ISignInInterface
         {
             Log("Canceled");
             SetPlatformFlag(true);
-            onSignInFinished?.Invoke(new SignInResult() { Error = "Canceled", });
+            onSignInFinished?.Invoke(new SignInResult()
+            {
+                SignInPlatform = SignInPlatform,
+                Error = "Canceled",
+            });
         }
         else
         {
@@ -119,6 +134,7 @@ internal class GoogleSignInImp : ISignInInterface
         GoogleSignIn.Configuration = configuration;
         GoogleSignIn.Configuration.UseGameSignIn = false;
         GoogleSignIn.Configuration.RequestIdToken = true;
+        GoogleSignIn.Configuration.RequestAuthCode = true;
 
         onSignInFinished = finished;
         GoogleSignIn.DefaultInstance.SignIn().ContinueWith(

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using LitJson;
 using UnityEngine;
 
 
@@ -40,7 +41,16 @@ public class SignInManager
     {
         return PlayerPrefs.GetString("LastSignInPlatform", "");
     }
-
+    
+    public static void TryQuickSignIn(Action<string> callback)
+    {
+        TryQuickSignIn((SignInResult r) =>
+        {
+            callback?.Invoke(JsonMapper.ToJson(r));
+        });
+    }
+   
+    [XLua.BlackList]
     public static void TryQuickSignIn(Action<SignInResult> finished)
     {
         if (currSignIn == null)
@@ -60,7 +70,7 @@ public class SignInManager
         {
             finished?.Invoke(new SignInResult()
             {
-                Error = ""
+                Error = "Quick SignIn Failed!"
             });
         }
     }
@@ -74,6 +84,17 @@ public class SignInManager
         currSignIn = null;
     }
 
+
+
+    public static void SignIn(string signInPlatform, Action<string> finished)
+    {
+        SignIn(signInPlatform, (SignInResult r) =>
+        {
+            finished?.Invoke(JsonMapper.ToJson(r));
+        });
+    }
+    
+    [XLua.BlackList]
     public static void SignIn(string signInPlatform, Action<SignInResult> finished)
     {
         Reset();
@@ -90,6 +111,17 @@ public class SignInManager
         {
             currSignIn.SignOut();
         }
+        else
+        {
+             var currPaltform = GetCurrSignIn();
+             if (!string.IsNullOrEmpty(currPaltform))
+             {
+                 interfaces.TryGetValue(currPaltform, out currSignIn);
+             }
+
+             currSignIn?.SignOut();
+        }
+        
         Reset();
     }
 }

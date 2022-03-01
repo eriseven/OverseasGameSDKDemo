@@ -12,12 +12,33 @@ local _demo_ui
 local _test_cases = {}
 
 
-_test_cases["first case"] = function()
-    print("this is first case")
-    CS.SDKWrapper.callSdkApi("com.unity3d.player.SDKWrapper", "Initialize", '{"code": 123}')
+
+
+_test_cases["GoogleSignIn"] = function()
+    print("GoogleSignIn")
+    CS.SignInManager.SignIn("Google", function(result)
+        print(result)   
+    end)
 end
 
+_test_cases["FacebookSignIn"] = function()
+    print("FacebookSignIn")
+    CS.SignInManager.SignIn("Facebook", function(result)
+        print(result)
+    end)
+end
 
+_test_cases["QuickSignIn"] = function()
+    print("QuickSignIn")
+    CS.SignInManager.TryQuickSignIn(function(result)
+        print(result)
+    end)
+end
+
+_test_cases["SignOut"] = function()
+    print("SignOut")
+    CS.SignInManager.SignOut()
+end
 
 function demo.Init(demo_ui)
     print("SDKDemo.Init")

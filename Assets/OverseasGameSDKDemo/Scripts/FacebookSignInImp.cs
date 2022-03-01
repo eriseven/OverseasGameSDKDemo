@@ -92,7 +92,8 @@ public class FacebookSignInImp : ISignInInterface
                     SetPlatformFlag(true);
                     finished?.Invoke(new SignInResult()
                     {
-                        Error = "",
+                        SignInPlatform = this.SignInPlatform,
+                        Error = string.IsNullOrEmpty(r.Error) ? "SignIn Failed!" : r.Error,
                     });
                 }
             });
@@ -117,7 +118,8 @@ public class FacebookSignInImp : ISignInInterface
                     SetPlatformFlag(true);
                     finished?.Invoke(new SignInResult()
                     {
-                        Error = "",
+                        SignInPlatform = SignInPlatform,
+                        Error = "Initialize Failed!",
                     });
                 }
             }, OnHideUnity);
@@ -149,7 +151,8 @@ public class FacebookSignInImp : ISignInInterface
                     SetPlatformFlag(true);
                     finished?.Invoke(new SignInResult()
                     {
-                        Error = "",
+                        SignInPlatform = SignInPlatform,
+                        Error = "Initialize Failed!",
                     });
                 }
             }, OnHideUnity);
