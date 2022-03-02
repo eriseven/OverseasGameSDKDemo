@@ -3,6 +3,10 @@ using LitJson;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using Firebase;
+using Firebase.Auth;
+
 using UnityEngine;
 
 internal static class FacebookSignInExtension
@@ -15,6 +19,8 @@ public class FacebookSignInImp : ISignInInterface
 {
     public static string Platform => "Facebook";
     public string SignInPlatform => Platform;
+    
+    private FirebaseAuth auth => FirebaseAuth.DefaultInstance;
 
     private void SetPlatformFlag(bool clear = false)
     {
@@ -62,13 +68,15 @@ public class FacebookSignInImp : ISignInInterface
         if (FB.IsLoggedIn)
         {
             var token = Facebook.Unity.AccessToken.CurrentAccessToken;
-            SetPlatformFlag();
-            finished?.Invoke(new SignInResult()
-            {
-                OpenID = token.UserId,
-                SignInPlatform = this.SignInPlatform,
-                Token = token.ToJson(),
-            });
+            
+            authwithfirebase(token.TokenString, finished);
+            // SetPlatformFlag();
+            // finished?.Invoke(new SignInResult()
+            // {
+            //     OpenID = token.UserId,
+            //     SignInPlatform = this.SignInPlatform,
+            //     Token = token.ToJson(),
+            // });
         }
         else
         {
@@ -78,17 +86,19 @@ public class FacebookSignInImp : ISignInInterface
                 if (FB.IsLoggedIn)
                 {
                     var token = Facebook.Unity.AccessToken.CurrentAccessToken;
-                    SetPlatformFlag();
-                    finished?.Invoke(new SignInResult()
-                    {
-                        OpenID = token.UserId,
-                        SignInPlatform = "Fackebook",
-                        Token = token.ToJson(),
-                    });
+
+                    authwithfirebase(token.TokenString, finished);
+                    
+                    // SetPlatformFlag();
+                    // finished?.Invoke(new SignInResult()
+                    // {
+                    //     OpenID = token.UserId,
+                    //     SignInPlatform = "Fackebook",
+                    //     Token = token.ToJson(),
+                    // });
                 }
                 else
                 {
-
                     SetPlatformFlag(true);
                     finished?.Invoke(new SignInResult()
                     {
@@ -101,6 +111,47 @@ public class FacebookSignInImp : ISignInInterface
 
     }
 
+    private void authwithfirebase(string accesstoken, Action<SignInResult> finished)
+    {
+        FirebaseUser newuser = null;
+        var credential = FacebookAuthProvider.GetCredential(accesstoken);
+        auth.SignInWithCredentialAsync(credential).ContinueWith(task =>
+        {
+            if (task.IsFaulted)
+            {
+                Debug.LogError("singin encountered error" + task.Exception);
+                return Task.FromException<string>(task.Exception);
+            }
+            else
+            {
+                newuser = task.Result;
+                Debug.Log(newuser.DisplayName);
+                return newuser.TokenAsync(false);
+            }
+        }).Unwrap().ContinueWith(task =>
+        {
+            SetPlatformFlag(true);
+            if (task.IsFaulted)
+            {
+                finished?.Invoke(new SignInResult()
+                {
+                    Error = task.Exception.Message,
+                    SignInPlatform = SignInPlatform,
+                });
+            }
+            else
+            {
+                SetPlatformFlag();
+                finished?.Invoke(new SignInResult()
+                {
+                    SignInPlatform = SignInPlatform,
+                    OpenID = newuser.UserId,
+                    Token = task.Result,
+                });
+            }
+        });
+    }
+    
     public void SignIn(Action<SignInResult> finished)
     {
         if (!FB.IsInitialized)

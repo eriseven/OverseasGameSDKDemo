@@ -5,9 +5,14 @@ using System.Threading.Tasks;
 using UnityEngine;
 using LitJson;
 
+using Firebase;
+using Firebase.Auth;
+
 internal static class GoogleSignInExtension
 {
     public static string ToJson(this GoogleSignInUser user) { return JsonMapper.ToJson(user); }
+
+    
 }
 
 
@@ -16,6 +21,8 @@ internal class GoogleSignInImp : ISignInInterface
     private string webClientId = "<your client id here>";
     private GoogleSignInConfiguration configuration;
 
+    private FirebaseAuth auth => FirebaseAuth.DefaultInstance;
+    
     void Log(string log)
     {
         Debug.Log($"[GoogleSignIn] {log}");
@@ -41,7 +48,6 @@ internal class GoogleSignInImp : ISignInInterface
             WebClientId = webClientId,
             RequestIdToken = true
         };
-
     }
 
     internal GoogleSignInImp()
@@ -86,7 +92,7 @@ internal class GoogleSignInImp : ISignInInterface
                             (GoogleSignIn.SignInException)enumerator.Current;
                     Log("Got Error: " + error.Status + " " + error.Message);
                     SetPlatformFlag(true);
-                    onSignInFinished?.Invoke(new SignInResult()
+                    onSignInFinished?.InvokeMainThread(new SignInResult()
                     {
                         SignInPlatform = Platform,
                         Error = "Got Error: " + error.Status + " " + error.Message,
@@ -96,7 +102,7 @@ internal class GoogleSignInImp : ISignInInterface
                 {
                     Log("Got Unexpected Exception?!?" + task.Exception);
                     SetPlatformFlag(true);
-                    onSignInFinished?.Invoke(new SignInResult()
+                    onSignInFinished?.InvokeMainThread(new SignInResult()
                     {
                         SignInPlatform = SignInPlatform,
                         Error = "Got Unexpected Exception?!?" + task.Exception,
@@ -108,7 +114,7 @@ internal class GoogleSignInImp : ISignInInterface
         {
             Log("Canceled");
             SetPlatformFlag(true);
-            onSignInFinished?.Invoke(new SignInResult()
+            onSignInFinished?.InvokeMainThread(new SignInResult()
             {
                 SignInPlatform = SignInPlatform,
                 Error = "Canceled",
@@ -117,13 +123,8 @@ internal class GoogleSignInImp : ISignInInterface
         else
         {
             Log("Welcome: " + task.Result.DisplayName + "!");
-            SetPlatformFlag();
-            onSignInFinished?.Invoke(new SignInResult()
-            {
-                SignInPlatform = this.SignInPlatform,
-                OpenID = task.Result.UserId,
-                Token = task.Result.ToJson(),
-            });
+            
+            SignInWithGoogleOnFirebase(task.Result.IdToken);
         }
     }
 
@@ -139,6 +140,63 @@ internal class GoogleSignInImp : ISignInInterface
         onSignInFinished = finished;
         GoogleSignIn.DefaultInstance.SignIn().ContinueWith(
           OnAuthenticationFinished);
+    }
+    
+    private void SignInWithGoogleOnFirebase(string idToken)
+    {
+        Credential credential = GoogleAuthProvider.GetCredential(idToken, null);
+
+        FirebaseUser fu = null;
+        if (auth == null)
+        {
+            Debug.LogError("Can not load FirebaseAuth");
+            return;
+        }
+        
+        auth?.SignInWithCredentialAsync(credential).ContinueWith(task =>
+            {
+                AggregateException ex = task.Exception;
+                if (ex != null)
+                {
+                    if (ex.InnerExceptions[0] is FirebaseException inner && (inner.ErrorCode != 0))
+                        Debug.LogError("\nError code = " + inner.ErrorCode + " Message = " + inner.Message);
+
+                    return Task.FromException<string>(ex);
+                }
+                else
+                {
+                    Debug.Log("Sign In Successful.");
+                    fu = task.Result;
+                    return task.Result.TokenAsync(false);
+                }
+            })
+            .Unwrap().ContinueWith(task =>
+            {
+                var result = new SignInResult();
+                AggregateException ex = task.Exception;
+                if (ex != null)
+                {
+                    Debug.Log($"TokenAsync failed!");
+                    onSignInFinished?.InvokeMainThread(new SignInResult()
+                    {
+                        SignInPlatform = this.SignInPlatform,
+                        Error = ex.Message,
+                    });
+                }
+                else
+                {
+                    
+                    Debug.Log($"TokenAsync {task.Result}!");
+                    SetPlatformFlag();
+                    onSignInFinished?.InvokeMainThread(new SignInResult()
+                    {
+                        SignInPlatform = this.SignInPlatform,
+                        OpenID = fu.UserId,
+                        Token = task.Result,
+                    });   
+                }
+            })
+            ;
     }
 
     public void SignOut()
