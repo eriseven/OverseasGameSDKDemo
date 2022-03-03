@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>259113062157-qb2gru9ikvua32gf0kmblo1s2emfo1n8.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.259113062157-qb2gru9ikvua32gf0kmblo1s2emfo1n8</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>259113062157-b82pki0b1gcfbvc333jsnildv2r4vtgd.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCKSiblp-6TecDwUFWgerU50Ul24qkxoG0</string>
+	<key>GCM_SENDER_ID</key>
+	<string>259113062157</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.dreality.crazyones</string>
+	<key>PROJECT_ID</key>
+	<string>gal-4925d</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gal-4925d.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:259113062157:ios:3096acf0bad4378ddcea44</string>
+</dict>
+</plist>

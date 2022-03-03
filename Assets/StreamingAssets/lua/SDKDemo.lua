@@ -28,6 +28,13 @@ _test_cases["FacebookSignIn"] = function()
     end)
 end
 
+_test_cases["AppleSignIn"] = function()
+    print("AppleSignIn")
+    CS.SignInManager.SignIn("Apple", function(result)
+        print(result)
+    end)
+end
+
 _test_cases["QuickSignIn"] = function()
     print("QuickSignIn")
     CS.SignInManager.TryQuickSignIn(function(result)
