@@ -47,6 +47,10 @@ public class SignInManager
         RegisterInterface(GoogleSignInImp.Platform,
             new GoogleSignInImp("259113062157-c9efto68ne73jplnvi6cav8au1ss8j5j.apps.googleusercontent.com"));
         RegisterInterface(FacebookSignInImp.Platform, new FacebookSignInImp());
+#if UNITY_IOS
+        RegisterInterface(AppleSignIn.Platform, AppleSignIn.Get());
+#endif
+        
         CheckFirebaseDependencies();
     }
 

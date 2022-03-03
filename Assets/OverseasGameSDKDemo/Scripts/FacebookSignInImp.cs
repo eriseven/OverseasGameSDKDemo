@@ -99,6 +99,10 @@ public class FacebookSignInImp : ISignInInterface
                 }
                 else
                 {
+                    foreach (var kvp in r.ErrorDictionary)
+                    {
+                        Debug.LogError($"Error[{kvp.Key}:{kvp.Value}]");
+                    }
                     SetPlatformFlag(true);
                     finished?.Invoke(new SignInResult()
                     {
