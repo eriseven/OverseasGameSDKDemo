@@ -20,14 +20,6 @@ public class AppleSignIn : MonoBehaviour, ISignInInterface
 
     public string AppleUserIdKey { get; private set; }
 
-    void Start()
-    {
-        if (AppleAuthManager.IsCurrentPlatformSupported)
-        {
-            var deserializer = new PayloadDeserializer();
-            this.appleAuthManager = new AppleAuthManager(deserializer);
-        }
-    }
 
     void Update()
     {
@@ -35,6 +27,62 @@ public class AppleSignIn : MonoBehaviour, ISignInInterface
         {
             this.appleAuthManager.Update();
         }
+    }
+
+    private void AttemptQuickLogin()
+    {
+        var rawNonce = GenerateRandomString(32);
+        var nonce = GenerateSHA256NonceFromRawNonce(rawNonce);
+        // var loginArgs = new AppleAuthLoginArgs(LoginOptions.IncludeEmail | LoginOptions.IncludeFullName, nonce);
+
+        var quickLoginArgs = new AppleAuthQuickLoginArgs(nonce);
+        this.appleAuthManager.QuickLogin(
+            quickLoginArgs,
+            credential =>
+            {
+                // Obtained credential, cast it to IAppleIDCredential
+                var appleIdCredential = credential as IAppleIDCredential;
+                if (appleIdCredential != null)
+                {
+                    // Apple User ID
+                    // You should save the user ID somewhere in the device
+                    var userId = appleIdCredential.User;
+                    PlayerPrefs.SetString(AppleUserIdKey, userId);
+
+                    // Identity token
+                    var identityToken = Encoding.UTF8.GetString(appleIdCredential.IdentityToken);
+
+                    // Authorization code
+                    var authorizationCode = Encoding.UTF8.GetString(appleIdCredential.AuthorizationCode);
+
+
+                    // And now you have all the information to create/login a user in your system
+                    Debug.Log("identityToken " + identityToken);
+                    Debug.Log("authorizationCode " + authorizationCode);
+                    authWithFirebase(identityToken, rawNonce, authorizationCode);
+                }
+                else
+                {
+                    SetPlatformFlag(true);
+                    onFinished.InvokeMainThread(new SignInResult()
+                    {
+                        Error = "IAppleIDCredential Casting Error.",
+                        SignInPlatform = SignInPlatform,
+                    });
+                }
+            },
+            error =>
+            {
+                // Something went wrong
+                var authorizationErrorCode = error.GetAuthorizationErrorCode();
+                Debug.LogError("authorizationErrorCode " + authorizationErrorCode);
+
+                onFinished.InvokeMainThread(new SignInResult()
+                {
+                    Error = error.LocalizedDescription,
+                    SignInPlatform = SignInPlatform,
+                });
+            });
     }
 
     private void SignInWithApple()
@@ -123,7 +171,7 @@ public class AppleSignIn : MonoBehaviour, ISignInInterface
                 if (task.IsFaulted)
                 {
                     Debug.Log($"TokenAsync failed!");
-                    
+
                     SetPlatformFlag(true);
                     onFinished?.InvokeMainThread(new SignInResult()
                     {
@@ -244,6 +292,17 @@ public class AppleSignIn : MonoBehaviour, ISignInInterface
         }
 
         instance = this;
+        if (AppleAuthManager.IsCurrentPlatformSupported)
+        {
+            var deserializer = new PayloadDeserializer();
+            this.appleAuthManager = new AppleAuthManager(deserializer);
+            this.appleAuthManager.SetCredentialsRevokedCallback(result =>
+            {
+                Debug.Log("Received revoked callback " + result);
+                // this.SetupLoginMenuForSignInWithApple();
+                PlayerPrefs.DeleteKey(AppleUserIdKey);
+            });
+        }
     }
 
     private void OnDestroy()
@@ -260,7 +319,8 @@ public class AppleSignIn : MonoBehaviour, ISignInInterface
 
     public void TryQuickSignIn(Action<SignInResult> finished)
     {
-        throw new NotImplementedException();
+        onFinished = finished;
+        AttemptQuickLogin();
     }
 
     public void SignIn(Action<SignInResult> finished)
@@ -271,6 +331,5 @@ public class AppleSignIn : MonoBehaviour, ISignInInterface
 
     public void SignOut()
     {
-        throw new NotImplementedException();
     }
 }
