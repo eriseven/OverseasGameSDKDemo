@@ -11,8 +11,30 @@ local _demo_ui
 
 local _test_cases = {}
 
+_test_cases["IAP Init"] = function()
+    print("IAP Init")
+    CS.IAPManager.Get():InitializePurchasing({"com.dreality.crazyones.iaptest.5coin"}, function(result)
+        print(result)   
+    end)
+end
 
+_test_cases["IAP Buy"] = function()
+    print("IAP Buy: com.dreality.crazyones.iaptest.5coin")
+    CS.IAPManager.Get():StartPurchase("com.dreality.crazyones.iaptest.5coin", function(result)
+        print(result)
+    end)
+end
 
+_test_cases["IAP Complete Purchase"] = function()
+    print("IAP Complete Purchase")
+    local pending = CS.IAPManager.Get():GetPendingPurchase()
+    if pending ~= nil then
+        CS.IAPManager.Get():ConfirmPendingPurchase()
+    else
+        print("No pending purchase found!")
+    end
+end
+--[[
 
 _test_cases["GoogleSignIn"] = function()
     print("GoogleSignIn")
@@ -46,6 +68,7 @@ _test_cases["SignOut"] = function()
     print("SignOut")
     CS.SignInManager.SignOut()
 end
+]]
 
 function demo.Init(demo_ui)
     print("SDKDemo.Init")

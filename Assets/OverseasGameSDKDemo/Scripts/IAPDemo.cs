@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using LitJson;
 using UnityEngine;
 using UnityEngine.Purchasing;
 // using Product = Facebook.Unity.Product;
@@ -30,6 +31,12 @@ public class IAPDemo : MonoBehaviour
         {
             // IAP may be disabled in device settings.
         }
-        Debug.LogError(i.ToString() + p.ToString());
+        Debug.LogError($"PurchaseFailed {p.ToString()}: {JsonMapper.ToJson(p)}");
+        
+    }
+
+    public void OnPurchaseCompletedEvent(Product p)
+    {
+        Debug.Log("OnPurchaseCompleted " + JsonMapper.ToJson(p)); 
     }
 }
